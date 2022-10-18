@@ -20,6 +20,13 @@ export default class GotService {
 
   async getCharacter(id) {
     const character = await this.getResouce(`/characters/${id}`);
+
+    for (let key in character) {
+      if (character[key] === "" || character[key] === "undefined") {
+        character[key] = "no data :(";
+      }
+    }
+
     return this._transformCharacter(character);
   }
 

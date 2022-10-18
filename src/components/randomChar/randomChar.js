@@ -5,11 +5,6 @@ import ErrorMessage from "../errorMessage";
 import "./randomChar.css";
 
 export default class RandomChar extends Component {
-  constructor() {
-    super();
-    this.updateCharacter();
-  }
-
   // инициализируем подключение к базе данных GameOfThrones
   got = new GotService();
 
@@ -18,6 +13,17 @@ export default class RandomChar extends Component {
     loading: true,
     error: false,
   };
+
+  componentDidMount() {
+    console.log("mounting");
+    this.updateCharacter();
+    this.timerId = setInterval(this.updateCharacter, 1500);
+  }
+
+  componentWillUnmount() {
+    console.log("unmounting");
+    clearInterval(this.timerId);
+  }
 
   // устанавливаем стейт в отдельной функции на будущее
   // если промис из updateCharacter выдал then, записываем в стейт случайного перса
@@ -41,15 +47,16 @@ export default class RandomChar extends Component {
   };
 
   // здесь просто получаем перса из базы данных и ставим его в стейт в функции onCharLoaded
-  updateCharacter() {
-    // const id = Math.floor(Math.random() * 140 + 25);
+  updateCharacter = () => {
+    const id = Math.floor(Math.random() * 140 + 25);
     // айдишка ниже для ошибки
-    const id = 130000000000;
+    // const id = 130000000000;
     this.got.getCharacter(id).then(this.onCharLoaded).catch(this.onError);
     // console.log(this.got.getCharacter(id));
-  }
+  };
 
   render() {
+    console.log("render");
     // берем переменные из стейта
     const { char, loading, error } = this.state;
 
