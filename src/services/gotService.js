@@ -3,7 +3,9 @@ export default class GotService {
     this._apiBase = "https://www.anapioficeandfire.com/api";
   }
 
-  async getResouce(url) {
+  // getResourse
+
+  getResouce = async (url) => {
     const res = await fetch(`${this._apiBase}${url}`);
 
     if (!res.ok) {
@@ -11,68 +13,90 @@ export default class GotService {
     }
 
     return await res.json();
-  }
+  };
 
-  async getAllCharacters() {
-    const res = await this.getResouce(`/characters?page=5&pageSize=10`);
-    return res.map(this._transformCharacter);
-  }
+  // characters
 
-  async getCharacter(id) {
+  getAllCharacters = async () => {
+    const characters = await this.getResouce(`/characters?page=5&pageSize=10`);
+    return characters.map(this._transformCharacter);
+  };
+
+  getCharacter = async (id) => {
     const character = await this.getResouce(`/characters/${id}`);
-
-    for (let key in character) {
-      if (character[key] === "" || character[key] === "undefined") {
-        character[key] = "no data :(";
-      }
-    }
-
     return this._transformCharacter(character);
-  }
+  };
 
-  getAllHomes() {
-    return this.getResouce(`/houses?page=5&pageSize=10`);
-  }
+  // houses
 
-  getHome(id) {
-    return this.getResouce(`/houses/${id}`);
-  }
+  getAllHouses = async () => {
+    const houses = await this.getResouce(`/houses/`);
+    return houses.map(this._transformHouse);
+  };
 
-  getAllBooks() {
-    return this.getResouce(`/books?page=5&pageSize=10`);
-  }
+  getHouse = async (id) => {
+    const house = await this.getResouce(`/houses/${id}`);
+    return this._transformHouse(house);
+  };
 
-  getBook(id) {
-    return this.getResouce(`/books/${id}`);
-  }
+  // books
 
-  _transformCharacter(char) {
+  getAllBooks = async () => {
+    const books = await this.getResouce(`/books/`);
+    return books.map(this._transformBook);
+  };
+
+  getBook = async (id) => {
+    const book = await this.getResouce(`/books/${id}`);
+    return this._transformBook(book);
+  };
+
+  // достаем последние цифры id из url каждого item, чтобы использовать этот id
+  // для рендера элементов списка ul в компоненте itemList
+  _extractId = (item) => {
+    const idRegExp = /\/([0-9]*)$/;
+    return item.url.match(idRegExp)[1];
+  };
+
+  isSet = (data) => {
+    if (data) {
+      return data;
+    } else {
+      return "no data :(";
+    }
+  };
+
+  _transformCharacter = (char) => {
     return {
-      name: char.name,
-      gender: char.name,
-      born: char.name,
-      died: char.died,
-      culture: char.culture,
+      id: this._extractId(char),
+      name: this.isSet(char.name),
+      gender: this.isSet(char.gender),
+      born: this.isSet(char.born),
+      died: this.isSet(char.died),
+      culture: this.isSet(char.culture),
+      // url: char.url,
     };
-  }
+  };
 
-  _transformHouse(house) {
+  _transformHouse = (house) => {
     return {
-      name: house.name,
-      region: house.region,
-      words: house.words,
-      titles: house.titles,
-      overlord: house.overlord,
-      ancestralWeapons: house.ancestralWeapons,
+      id: this._extractId(house),
+      name: this.isSet(house.name),
+      region: this.isSet(house.region),
+      words: this.isSet(house.words),
+      titles: this.isSet(house.titles),
+      overlord: this.isSet(house.overlord),
+      ancestralWeapons: this.isSet(house.ancestralWeapons),
     };
-  }
+  };
 
-  _transformBook(book) {
+  _transformBook = (book) => {
     return {
-      name: book.name,
-      numberOfPages: book.numberOfPages,
-      publiser: book.publiser,
-      released: book.released,
+      id: this._extractId(book),
+      name: this.isSet(book.name),
+      numberOfPages: this.isSet(book.numberOfPages),
+      publiser: this.isSet(book.publiser),
+      released: this.isSet(book.released),
     };
-  }
+  };
 }

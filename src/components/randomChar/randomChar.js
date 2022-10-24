@@ -15,13 +15,11 @@ export default class RandomChar extends Component {
   };
 
   componentDidMount() {
-    console.log("mounting");
     this.updateCharacter();
     this.timerId = setInterval(this.updateCharacter, 1500);
   }
 
   componentWillUnmount() {
-    console.log("unmounting");
     clearInterval(this.timerId);
   }
 
@@ -46,7 +44,7 @@ export default class RandomChar extends Component {
     });
   };
 
-  // здесь просто получаем перса из базы данных и ставим его в стейт в функции onCharLoaded
+  // здесь получаем перса из базы данных и ставим его в стейт в функции onCharLoaded
   updateCharacter = () => {
     const id = Math.floor(Math.random() * 140 + 25);
     // айдишка ниже для ошибки
@@ -56,7 +54,6 @@ export default class RandomChar extends Component {
   };
 
   render() {
-    console.log("render");
     // берем переменные из стейта
     const { char, loading, error } = this.state;
 

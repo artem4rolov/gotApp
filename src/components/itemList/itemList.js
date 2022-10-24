@@ -1,20 +1,22 @@
 import React, { Component } from "react";
-import GotService from "../../services/gotService";
 import Spinner from "../spinner";
+import GotService from "../../services/gotService";
+
 import "./itemList.css";
 
 export default class ItemList extends Component {
-  got = new GotService();
-
+  gotService = new GotService();
   // инициализируем стейт с пустыми персами
   state = {
-    charList: null,
+    charListFormState: null,
   };
 
   // получаем персов через GotService и записываем их в стейт
   componentDidMount() {
-    this.got.getAllCharacters().then((charListFromBase) => {
-      this.setState({ charList: charListFromBase });
+    const { getData } = this.props;
+
+    getData().then((charListFromBase) => {
+      this.setState({ charListFormState: charListFromBase });
     });
   }
 
@@ -25,16 +27,23 @@ export default class ItemList extends Component {
     // обязательно в аргументах при map задаем сам элемент и его номер по порядку,
     // т.к. react должен будет понимать, какой уникальный номер у каждого элемента
     // и использовать это для последующих обработчиков событий, по типу клика
-    return arr.map((item, i) => {
+    return arr.map((item) => {
+      const { id } = item;
+      const label = this.props.renderItem(item);
+      // в key элемента li записываем id персонажа из базы, отрезаем всю строку
+      // со свойства url, и оставляем лишь номер персонажа в базе
+      // т.к. мы находимся на 5ой странице - номера идут от 41 до 50
       return (
         <li
-          key={i}
+          key={id}
           className="list-group-item"
           // приходит из пропсов в компоненте App, для передачи номера элемента
           // необходимо указывать как стрелочную функцию
-          onClick={() => this.props.onCharSelected(41 + i)}
+          // 41 + i т.к. у нас 5ая страница в базе, где у персонажей есть хоть
+          // какие-то данные
+          onClick={() => this.props.onItemSelected(id)}
         >
-          {item.name}
+          {label}
         </li>
       );
     });
@@ -42,16 +51,16 @@ export default class ItemList extends Component {
 
   render() {
     // получаем наш массив с объектами (персами) из стейта
-    const { charList } = this.state;
+    const { charListFormState } = this.state;
 
     // если массив пуст - показываем спиннер
-    if (!charList) {
+    if (!charListFormState) {
       return <Spinner />;
     }
 
     // если массив не пуст, прогоняем его через функицю renderItems, которая
     // возвращает нам верстку с элементами li, в которых имена наших персов
-    const items = this.renderItems(charList);
+    const items = this.renderItems(charListFormState);
 
     return <ul className="item-list list-group">{items}</ul>;
   }
