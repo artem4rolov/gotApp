@@ -23,3 +23,7 @@
   margin-right: 20px;
   font-size: 18px;
 }
+
+li > a.active {
+  color: rgb(184, 165, 131);
+}

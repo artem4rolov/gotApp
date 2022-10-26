@@ -3,10 +3,8 @@ import ItemList from "../itemList";
 import ItemDetails, { Field } from "../itemDetails";
 import ErrorMessage from "../errorMessage";
 import GotService from "../../services/gotService";
-// получаем match, history и location через withRouter
-import { withRouter } from "react-router";
 
-class BooksPage extends React.Component {
+export default class BooksPage extends React.Component {
   gotService = new GotService();
 
   state = {
@@ -55,5 +53,3 @@ class BooksPage extends React.Component {
     );
   }
 }
-
-export default withRouter(BooksPage);
