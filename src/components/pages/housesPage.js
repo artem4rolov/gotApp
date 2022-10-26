@@ -37,7 +37,7 @@ export default class HousesPage extends React.Component {
       // передаем getData для передачи конкретной функции в пропсы (получение персонажей ИЛИ книг ИЛИ домов)
       // передаем renderItem, чтобы задать то, что мы хотим видеть в каждом элементе при рендере (имя, пол, можно любое свойство из объекта item (наш персонаж ИЛИ книга ИЛИ дом))
       <ItemList
-        onItemSelected={this.onItemSelected}
+        // onItemSelected={this.onItemSelected}
         getData={this.gotService.getAllHouses}
         renderItem={(item) => `${item.name} (${item.region})`}
       />

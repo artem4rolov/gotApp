@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Spinner from "../spinner";
 import GotService from "../../services/gotService";
+import { PropTypes } from "prop-types";
 
 import "./itemList.css";
 
@@ -9,6 +10,16 @@ export default class ItemList extends Component {
   // инициализируем стейт с пустыми персами
   state = {
     charListFormState: null,
+  };
+
+  // задаем дефолтные пропсы
+  static defaultProps = {
+    onItemSelected: () => {},
+  };
+
+  // проверяем, что метод onItemSelected в компоненте ItemList является функцией
+  static propTypes = {
+    onItemSelected: PropTypes.func,
   };
 
   // получаем персов через GotService и записываем их в стейт

@@ -3,6 +3,7 @@ import GotService from "../../services/gotService";
 import Spinner from "../spinner";
 import ErrorMessage from "../errorMessage";
 import "./randomChar.css";
+import { PropTypes } from "prop-types";
 
 export default class RandomChar extends Component {
   // инициализируем подключение к базе данных GameOfThrones
@@ -14,9 +15,14 @@ export default class RandomChar extends Component {
     error: false,
   };
 
+  // дефольные пропсы (интервал обновления рандомного персонажа)
+  static defaultProps = {
+    interval: 15000,
+  };
+
   componentDidMount() {
     this.updateCharacter();
-    this.timerId = setInterval(this.updateCharacter, 1500);
+    this.timerId = setInterval(this.updateCharacter, this.props.interval);
   }
 
   componentWillUnmount() {
@@ -76,6 +82,11 @@ export default class RandomChar extends Component {
     );
   }
 }
+
+// проверям, что наш переменная interval является числом
+RandomChar.propTypes = {
+  interval: PropTypes.number,
+};
 
 // отделяем основную верстку, чтобы спиннер и сообщение об ошибке показывались
 // отдельно в компоненте, на белом фоне, иначе - все будет как в шаурме
