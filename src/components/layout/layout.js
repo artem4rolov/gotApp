@@ -24,7 +24,7 @@ export default class Layout extends React.Component {
     const showRandomChar = this.state.showRandomChar;
 
     // если значение true, показываем компонент RandomChar, если false - ничего не показываем
-    const content = showRandomChar ? <RandomChar /> : null;
+    const content = showRandomChar ? <RandomChar interval={3000} /> : null;
 
     if (this.state.error) {
       return <ErrorMessage />;

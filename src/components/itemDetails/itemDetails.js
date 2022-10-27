@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import GotService from "../../services/gotService";
 import "./itemDetails.css";
 
@@ -13,36 +13,22 @@ const Field = ({ item, field, label }) => {
 
 export { Field };
 
-export default class ItemDetails extends Component {
-  got = new GotService();
-
-  state = {
-    item: null,
-  };
+// функциональный компонент
+export default function ItemDetails({ charId, getData, ...props }) {
+  const [item, setItem] = useState(null);
 
   // при монтировании компонента, получаем перса из метода updateChar
-  componentDidMount() {
-    this.updateChar();
-  }
-
-  // при клике на другого персонажа в компоненте itemList, мы принимаем новый id
-  // и только в этом случае сработает хук componentDidUpdate
-  // в этот хук обязательно нужно передавать предыдущий props - prevProps
-  componentDidUpdate(prevProps) {
-    // компонент charDetails будет обновлен только в том случае, если предыдущий props (id)
-    // из компонента App и текущий (новый кликнутый элемент) id не будут равны
-    // (т.е. действительно произошел клик на другого персонажа из списка компонента itemList
-    // и мы получили новый id)
-    if (this.props.charId !== prevProps.charId) {
-      // только в этом случае мы обновляем инфу о персонаже
-      this.updateChar();
-    }
-  }
+  useEffect(() => {
+    updateChar();
+    console.log("update details");
+    // указывая вторым аргументом [charId] мы говорим реакту, чтобы обновлял компонент
+    // itemDetails ТОЛЬКО после того, как мы получим новые пропсы (charID - новый
+    // id элемента на который кликнули в компоненте ItemList)
+  }, [charId]);
 
   // метод получает персонажа из базы GameOfThrones
-  updateChar() {
+  const updateChar = () => {
     // принимаем id из пропсов в компоненте App
-    const { charId, getData } = this.props;
     if (!charId) {
       // если вдруг ничего не пришло - ничего не делаем
       return;
@@ -51,34 +37,31 @@ export default class ItemDetails extends Component {
     // если получили айди из props, подключаемся к базе и получаем перса по id
     // и записываем в state
     getData(charId).then((itemFromBase) => {
-      this.setState({ item: itemFromBase });
+      setItem(itemFromBase);
     });
     // код ниже - для ошибки в компоненте, пример использования
     // хука componentDidCatch
     // this.foo.bar = 1;
+  };
+
+  // если вдруг state с персонажем пуст - выводим сообщение
+  if (!item) {
+    return <span className="select-error">Please select element</span>;
   }
 
-  render() {
-    // если вдруг state с персонажем пуст - выводим сообщение
-    if (!this.state.item) {
-      return <span className="select-error">Please select element</span>;
-    }
+  const { name } = item;
 
-    const { item } = this.state;
-    const { name } = item;
-
-    return (
-      <div className="char-details rounded">
-        <h4>{name}</h4>
-        <ul className="list-group list-group-flush">
-          {/* при клике на какой-либо элемент из списка, мы делаем копии каждого Field
+  return (
+    <div className="char-details rounded">
+      <h4>{name}</h4>
+      <ul className="list-group list-group-flush">
+        {/* при клике на какой-либо элемент из списка, мы делаем копии каждого Field
           (свойство объекта) из пропсов, а значения этих свойств берем из конкретного
           item, на который кликнули (персонаж, книга, дом) */}
-          {React.Children.map(this.props.children, (child) => {
-            return React.cloneElement(child, { item });
-          })}
-        </ul>
-      </div>
-    );
-  }
+        {React.Children.map(props.children, (child) => {
+          return React.cloneElement(child, { item });
+        })}
+      </ul>
+    </div>
+  );
 }

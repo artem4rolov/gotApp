@@ -1,87 +1,72 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import GotService from "../../services/gotService";
 import Spinner from "../spinner";
 import ErrorMessage from "../errorMessage";
 import "./randomChar.css";
 import { PropTypes } from "prop-types";
 
-export default class RandomChar extends Component {
+// функциональный компонент
+function RandomChar({ interval }) {
   // инициализируем подключение к базе данных GameOfThrones
-  got = new GotService();
+  const got = new GotService();
 
-  state = {
-    char: {},
-    loading: true,
-    error: false,
-  };
+  const [char, setChar] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
-  // дефольные пропсы (интервал обновления рандомного персонажа)
-  static defaultProps = {
-    interval: 15000,
-  };
+  useEffect(() => {
+    // при маунтинге и обновлении компонента - перерисовываем его
+    let timerId = setInterval(updateCharacter, interval);
+    // при удалении компонента со страницы - выполняем функцию ниже
+    return () => {
+      clearInterval(timerId);
+    };
+  });
 
-  componentDidMount() {
-    this.updateCharacter();
-    this.timerId = setInterval(this.updateCharacter, this.props.interval);
+  // берем item из базы GOT и помещаем в стейт
+  // останавливаем спиннер, ошибка в false
+  function onCharLoaded(charFromBase) {
+    setChar(charFromBase);
+    setLoading(false);
+    setError(false);
   }
-
-  componentWillUnmount() {
-    clearInterval(this.timerId);
-  }
-
-  // устанавливаем стейт в отдельной функции на будущее
-  // если промис из updateCharacter выдал then, записываем в стейт случайного перса
-  // из базы данных - 1) спиннер останавливаем, 2) ошибок нет
-
-  onCharLoaded = (charFromBase) => {
-    this.setState({
-      char: charFromBase,
-      loading: false,
-      error: false,
-    });
-  };
 
   // если промис из updateCharacter выдал catch, вызываем эту функцию
   // ошибка - true (показываем надпись в компоненте), спиннер останавливаем
-  onError = () => {
-    this.setState({
-      error: true,
-      loading: false,
-    });
-  };
+  function onError() {
+    setError(true);
+    setLoading(true);
+  }
 
   // здесь получаем перса из базы данных и ставим его в стейт в функции onCharLoaded
-  updateCharacter = () => {
+  const updateCharacter = () => {
     const id = Math.floor(Math.random() * 140 + 25);
     // айдишка ниже для ошибки
     // const id = 130000000000;
-    this.got.getCharacter(id).then(this.onCharLoaded).catch(this.onError);
+    got.getCharacter(id).then(onCharLoaded).catch(onError);
     // console.log(this.got.getCharacter(id));
   };
 
-  render() {
-    // берем переменные из стейта
-    const { char, loading, error } = this.state;
+  // прописываем логику для контента
+  // если есть какая-то ошибка, то помимо консоли, выводим сообщение об ошибке в компонент,
+  // чтобы юзер понимал что происходит
+  const errorMessage = error ? <ErrorMessage /> : null;
+  // если загрузка не завершена, и ошибок нет, продолжаем показывать спиннер
+  const spinner = loading ? <Spinner /> : null;
+  // если нет никаких ошибок и загрузка персонажа завершилась успешно, показываем
+  // данные (компонент View), прописываем для компонента View пропсы (char из стэйта)
+  const content = !(loading || error) ? <View char={char} /> : null;
 
-    // прописываем логику для контента
-    // если есть какая-то ошибка, то помимо консоли, выводим сообщение об ошибке в компонент,
-    // чтобы юзер понимал что происходит
-    const errorMessage = error ? <ErrorMessage /> : null;
-    // если загрузка не завершена, и ошибок нет, продолжаем показывать спиннер
-    const spinner = loading ? <Spinner /> : null;
-    // если нет никаких ошибок и загрузка персонажа завершилась успешно, показываем
-    // данные (компонент View), прописываем для компонента View пропсы (char из стэйта)
-    const content = !(loading || error) ? <View char={char} /> : null;
-
-    return (
-      <div className="random-block rounded">
-        {spinner}
-        {errorMessage}
-        {content}
-      </div>
-    );
-  }
+  return (
+    <div className="random-block rounded">
+      {spinner}
+      {errorMessage}
+      {content}
+    </div>
+  );
 }
+
+export default RandomChar;
 
 // проверям, что наш переменная interval является числом
 RandomChar.propTypes = {
